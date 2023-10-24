@@ -77,20 +77,63 @@ class TextInputBox:
 
 # Class for creating a button
 class Button:
-    def __init__(self, rect, font, text, background_color, text_color):
+    def __init__(self, rect, font, text, background_color, text_color, action):
         self.rect = rect  # Rectangular area for the button
         self.font = font  # Font for the button text
         self.text = text  # Button text
         self.background_color = background_color  # Button background color
         self.text_color = text_color  # Text color
+        self.action = action  # Action to perform when the button is clicked
+        self.clicked = False  # Indicates if the button is currently clicked
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.background_color, self.rect)
+        if self.clicked:
+            # Darken the button when it's clicked
+            darkened_color = (self.background_color[0] - 30, self.background_color[1] - 30, self.background_color[2] - 30)
+            pygame.draw.rect(screen, darkened_color, self.rect)
+        else:
+            pygame.draw.rect(screen, self.background_color, self.rect)
+
         pygame.draw.rect(screen, (0, 0, 0), self.rect, 2)  # Draw a border around the button
         text_surface = self.font.render(self.text, True, self.text_color)
         text_x = self.rect.x + (self.rect.width - text_surface.get_width()) // 2
         text_y = self.rect.y + (self.rect.height - text_surface.get_height()) // 2
         screen.blit(text_surface, (text_x, text_y))
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.rect.collidepoint(event.pos):
+                self.clicked = True
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            if self.clicked and self.rect.collidepoint(event.pos):
+                self.clicked = False
+                if self.action is not None:
+                    self.action()  # Perform the button's action
+
+
+# Action for the "Ingresar" button (you can replace this with your desired action)
+def ingresar_action():
+    print("Ingresar button clicked")  # Replace with your action logic
+
+
+class HoverText:
+    def __init__(self, text, font, position, default_color, hover_color):
+        self.text = text
+        self.font = font
+        self.position = position
+        self.default_color = default_color
+        self.hover_color = hover_color
+        self.rect = None
+        self.is_hovered = False
+
+    def update(self):
+        self.rect = self.font.render(self.text, True, self.default_color)
+        self.is_hovered = self.rect.get_rect(topleft=self.position).collidepoint(pygame.mouse.get_pos())
+
+    def draw(self, screen):
+        color = self.hover_color if self.is_hovered else self.default_color
+        text_surface = self.font.render(self.text, True, color)
+        screen.blit(text_surface, self.position)
 
 # Initialize Pygame
 pygame.init()
@@ -122,7 +165,12 @@ password_input.rect.x += 50
 # Create the "Ingresar" button right below the text input boxes and of the same size
 button_font = pygame.font.Font(None, 36)
 button_width, button_height = 400, 40  # Same size as the text input boxes
-ingresar_button = Button(pygame.Rect(screen_width // 2 + 300, screen_height // 2 + 120, button_width, button_height), button_font, "Ingresar", (192, 192, 192), (0, 0, 0))
+ingresar_button = Button(pygame.Rect(screen_width // 2 + 300, screen_height // 2 + 120, button_width, button_height), button_font, "Ingresar", (192, 192, 192), (0, 0, 0), ingresar_action)
+
+# Create the "Crear cuenta" text link below the "Ingresar" button
+crear_cuenta_text = HoverText("Crear cuenta", button_font, (screen_width // 2 + 425, screen_height // 2 + 200), (0, 0, 0), (0, 0, 255))
+# Create the "¿Olvidaste tu contraseña?" text link below the "Crear cuenta" link
+olvidaste_contrasena_text = HoverText("¿Olvidaste tu contraseña?", button_font, (screen_width // 2 + 350, screen_height // 2 + 260), (0, 0, 0), (0, 0, 255))
 
 # Main game loop
 running = True
@@ -133,6 +181,7 @@ while running:
 
         username_input.handle_event(event)
         password_input.handle_event(event)
+        ingresar_button.handle_event(event)
 
     screen.fill(light_blue)
 
@@ -145,6 +194,14 @@ while running:
 
     # Draw the "Ingresar" button
     ingresar_button.draw(screen)
+
+    # Update and draw the "Crear cuenta" text link
+    crear_cuenta_text.update()
+    crear_cuenta_text.draw(screen)
+
+    # Update and draw the "¿Olvidaste tu contraseña?" text link
+    olvidaste_contrasena_text.update()
+    olvidaste_contrasena_text.draw(screen)
 
     pygame.display.flip()
 
