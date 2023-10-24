@@ -1,3 +1,5 @@
+
+
 import pygame
 import time
 
@@ -73,7 +75,7 @@ class TextInputBox:
             text_y = self.rect.y + (self.rect.height - text_surface.get_height()) // 2
             screen.blit(text_surface, (text_x, text_y))
 
-# Clase para un botón
+# Class for creating a button
 class Button:
     def __init__(self, rect, font, text, background_color, text_color):
         self.rect = rect  # Rectangular area for the button
