@@ -96,7 +96,7 @@ def show_page3():
         question_entries.append(question_entry)
 
     # Add an image on the third page
-    image = Image.open("images/promo.jpg")
+    image = Image.open("src\Registration\images\promo.jpg")
     image = image.resize((500, 600))  # Adjust the image size as needed
     image = ImageTk.PhotoImage(image)
 
@@ -206,11 +206,11 @@ password_label.pack(side="left")
 password_entry = tk.Entry(password_frame, show="*")
 password_entry.pack(side="left")
 
-show_eye_icon = Image.open("images/ojo1.png")
+show_eye_icon = Image.open("src\Registration\images\ojo1.png")
 show_eye_icon.thumbnail((20, 20))
 show_eye_icon = ImageTk.PhotoImage(show_eye_icon)
 
-hide_eye_icon = Image.open("images/ojo2.png")
+hide_eye_icon = Image.open("src\Registration\images\ojo2.png")
 hide_eye_icon.thumbnail((20, 20))
 hide_eye_icon = ImageTk.PhotoImage(hide_eye_icon)
 

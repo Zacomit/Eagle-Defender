@@ -1,5 +1,5 @@
 
-
+# Import Libraries
 import pygame
 import time
 
@@ -13,9 +13,10 @@ class TextInputBox:
         self.text = ''  # The current text entered by the user
         self.show_placeholder = True  # Controls the visibility of the placeholder text
         self.cursor_visible = True  # Controls the visibility of the text cursor
-        self.cursor_flash_time = 0.5  # Time interval for cursor blinking
+        self.cursor_flash_time = 0.1  # Time interval for cursor blinking
         self.last_cursor_toggle = time.time()  # Keeps track of time for cursor blinking
         self.input_active = False  # Indicates if the input box is currently active for text entry
+        self.password_mode = True  # Password mode (Shown ot hide)
 
     def handle_event(self, event):
         # Handle user input events for the text input box
@@ -33,7 +34,7 @@ class TextInputBox:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     # Handle Enter key (e.g., process input, clear text)
-                    print(self.text)  # Replace with your processing logic
+                    print(self.text)  
                     self.text = ''  # Clear the input
                 elif event.key == pygame.K_BACKSPACE:
                     # Handle Backspace key (delete a character)
@@ -56,11 +57,17 @@ class TextInputBox:
         pygame.draw.rect(screen, (0, 0, 0), self.rect, 2)  # Draw a border around the input box
 
         if self.input_active:
-            if self.cursor_visible:
-                # Draw the text cursor
+            cursor_x = 0  # Inicializa la posición del cursor
+
+            if self.password_mode and self.placeholder != "Nombre de Usuario":
+                # Si estás en modo de contraseña y no es el cuadro de usuario, usa la longitud de la cadena enmascarada
+                cursor_x = self.rect.x + 5 + self.font.size('◊' * len(self.text))[0]
+            else:
+                # Si no estás en modo de contraseña o es el cuadro de usuario, usa la longitud del texto real
                 cursor_x = self.rect.x + 5 + self.font.size(self.text)[0]
-                cursor_y = self.rect.y + 5
-                pygame.draw.line(screen, (0, 0, 0), (cursor_x, cursor_y), (cursor_x, cursor_y + self.rect.height - 10), 2)
+
+            cursor_y = self.rect.y + 5
+            pygame.draw.line(screen, (0, 0, 0), (cursor_x, cursor_y), (cursor_x, cursor_y + self.rect.height - 10), 2)
 
         if not self.text:
             # Draw the placeholder text when no text is entered
@@ -70,10 +77,15 @@ class TextInputBox:
             screen.blit(placeholder_surface, (placeholder_x, placeholder_y))
         else:
             # Draw the entered text
-            text_surface = self.font.render(self.text, True, (0, 0, 0))
+            if self.password_mode and self.placeholder != "Nombre de Usuario":  # Check the password_mode
+                text_to_display = '◊' * len(self.text)  # Display as asterisks
+            else:
+                text_to_display = self.text  # Display as normal text
+            text_surface = self.font.render(text_to_display, True, (0, 0, 0))
             text_x = self.rect.x + 5
             text_y = self.rect.y + (self.rect.height - text_surface.get_height()) // 2
             screen.blit(text_surface, (text_x, text_y))
+
 
 # Class for creating a button
 class Button:
@@ -111,9 +123,9 @@ class Button:
                     self.action()  # Perform the button's action
 
 
-# Action for the "Ingresar" button (you can replace this with your desired action)
+# Action for the "Ingresar" button
 def ingresar_action():
-    print("Ingresar button clicked")  # Replace with your action logic
+    print("Ingresar button clicked")  
 
 
 class HoverText:
@@ -172,6 +184,25 @@ crear_cuenta_text = HoverText("Crear cuenta", button_font, (screen_width // 2 + 
 # Create the "¿Olvidaste tu contraseña?" text link below the "Crear cuenta" link
 olvidaste_contrasena_text = HoverText("¿Olvidaste tu contraseña?", button_font, (screen_width // 2 + 350, screen_height // 2 + 260), (0, 0, 0), (0, 0, 255))
 
+# eye icon dimension and position
+eye_scale = 55
+eye_x = 1600
+eye_y = 522
+
+# Load the images of the open eye and the closed eye
+og_eye_open = pygame.image.load("src\Autentication\images\eye_open.png")
+eye_open = pygame.transform.scale(og_eye_open, (eye_scale,eye_scale))
+
+og_eye_closed = pygame.image.load("src\Autentication\images\eye_closed.png")
+eye_closed = pygame.transform.scale(og_eye_closed, (eye_scale, eye_scale))
+
+# Create a rectangle for the eye icon
+eye_icon_rect = pygame.Rect(eye_x, eye_y, eye_scale, eye_scale)
+
+# Initializes the eye state as open
+eye_state = 'open'
+
+
 # Main game loop
 running = True
 while running:
@@ -182,6 +213,18 @@ while running:
         username_input.handle_event(event)
         password_input.handle_event(event)
         ingresar_button.handle_event(event)
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            # Check if the eye icon was clicked
+            if eye_icon_rect.collidepoint(event.pos):
+                if eye_state == 'open':
+                    eye_state = 'closed'
+                else:
+                    eye_state = 'open'
+
+                password_input.password_mode = not password_input.password_mode
+        
+        
 
     screen.fill(light_blue)
 
@@ -202,6 +245,13 @@ while running:
     # Update and draw the "¿Olvidaste tu contraseña?" text link
     olvidaste_contrasena_text.update()
     olvidaste_contrasena_text.draw(screen)
+
+    # Draws the eye image at the specified location
+    if eye_state == 'open':
+        screen.blit(eye_open, (eye_x, eye_y))
+    else:
+        screen.blit(eye_closed, (eye_x, eye_y))
+
 
     pygame.display.flip()
 
