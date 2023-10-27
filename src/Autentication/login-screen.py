@@ -13,7 +13,7 @@ class TextInputBox:
         self.text = ''  # The current text entered by the user
         self.show_placeholder = True  # Controls the visibility of the placeholder text
         self.cursor_visible = True  # Controls the visibility of the text cursor
-        self.cursor_flash_time = 0.1  # Time interval for cursor blinking
+        self.cursor_flash_time = 1  # Time interval for cursor blinking
         self.last_cursor_toggle = time.time()  # Keeps track of time for cursor blinking
         self.input_active = False  # Indicates if the input box is currently active for text entry
         self.password_mode = True  # Password mode (Shown ot hide)
@@ -51,23 +51,26 @@ class TextInputBox:
                 self.cursor_visible = not self.cursor_visible
                 self.last_cursor_toggle = time.time()
 
+
+
     def draw(self, screen):
         # Draw the input box and its contents
         pygame.draw.rect(screen, (255, 255, 255), self.rect)  # Draw the input box background
         pygame.draw.rect(screen, (0, 0, 0), self.rect, 2)  # Draw a border around the input box
 
         if self.input_active:
-            cursor_x = 0  # Inicializa la posición del cursor
+            cursor_x = 0  # Initialize the cursor position
 
-            if self.password_mode and self.placeholder != "Nombre de Usuario":
-                # Si estás en modo de contraseña y no es el cuadro de usuario, usa la longitud de la cadena enmascarada
+            if self.password_mode and self.placeholder == "Contraseña":
+                # If you are in password mode and it is not the user box, use the length of the masked string
                 cursor_x = self.rect.x + 5 + self.font.size('◊' * len(self.text))[0]
             else:
-                # Si no estás en modo de contraseña o es el cuadro de usuario, usa la longitud del texto real
+                # If you are not in password mode or it is the user box, use the length of the actual text
                 cursor_x = self.rect.x + 5 + self.font.size(self.text)[0]
 
             cursor_y = self.rect.y + 5
-            pygame.draw.line(screen, (0, 0, 0), (cursor_x, cursor_y), (cursor_x, cursor_y + self.rect.height - 10), 2)
+            if self.cursor_visible:  # Check if cursor should be visible
+                pygame.draw.line(screen, (0, 0, 0), (cursor_x, cursor_y), (cursor_x, cursor_y + self.rect.height - 10), 2)
 
         if not self.text:
             # Draw the placeholder text when no text is entered
@@ -77,7 +80,7 @@ class TextInputBox:
             screen.blit(placeholder_surface, (placeholder_x, placeholder_y))
         else:
             # Draw the entered text
-            if self.password_mode and self.placeholder != "Nombre de Usuario":  # Check the password_mode
+            if self.password_mode and self.placeholder == "Contraseña":  # Check the password_mode
                 text_to_display = '◊' * len(self.text)  # Display as asterisks
             else:
                 text_to_display = self.text  # Display as normal text
@@ -252,7 +255,7 @@ while running:
     else:
         screen.blit(eye_closed, (eye_x, eye_y))
 
-
+    
     pygame.display.flip()
 
 # Quit Pygame
