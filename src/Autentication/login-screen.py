@@ -150,6 +150,9 @@ class HoverText:
         text_surface = self.font.render(self.text, True, color)
         screen.blit(text_surface, self.position)
 
+
+
+
 # Initialize Pygame
 pygame.init()
 
@@ -182,6 +185,7 @@ button_font = pygame.font.Font(None, 36)
 button_width, button_height = 400, 40  # Same size as the text input boxes
 ingresar_button = Button(pygame.Rect(screen_width // 2 + 300, screen_height // 2 + 120, button_width, button_height), button_font, "Ingresar", (192, 192, 192), (0, 0, 0), ingresar_action)
 
+
 # Create the "Crear cuenta" text link below the "Ingresar" button
 crear_cuenta_text = HoverText("Crear cuenta", button_font, (screen_width // 2 + 425, screen_height // 2 + 200), (0, 0, 0), (0, 0, 255))
 # Create the "¿Olvidaste tu contraseña?" text link below the "Crear cuenta" link
@@ -205,6 +209,55 @@ eye_icon_rect = pygame.Rect(eye_x, eye_y, eye_scale, eye_scale)
 # Initializes the eye state as open
 eye_state = 'open'
 
+# Agregar las imágenes de las banderas y definir las posiciones
+flag_es = pygame.image.load("src\Autentication\images\spanish_flag.png")
+flag_en = pygame.image.load("src\Autentication\images\english_flag.png")
+flag_fr = pygame.image.load("src\Autentication\images\_french_flag.png")
+flag_x, flag_y = screen_width - 100, 10  # Posición de las banderas
+
+# Definir un idioma predeterminado
+current_language = "es"  # Español
+
+def change_language(language):
+    global current_language
+    current_language = language
+    update_labels(language)
+
+
+
+def update_labels(language):
+    username_input.placeholder = translations[language]["username_label"]
+    password_input.placeholder = translations[language]["password_label"]
+    ingresar_button.text = translations[language]["login_button"]
+    crear_cuenta_text.text = translations[language]["create_account_link"]
+    olvidaste_contrasena_text.text = translations[language]["forgot_password_link"]
+
+
+
+translations = {
+    "es": {
+        "username_label": "Nombre de Usuario",
+        "password_label": "Contraseña",
+        "login_button": "Ingresar",
+        "create_account_link": "Crear cuenta",
+        "forgot_password_link": "¿Olvidaste tu contraseña?"
+    },
+    "en": {
+        "username_label": "Username",
+        "password_label": "Password",
+        "login_button": "Log In",
+        "create_account_link": "Create Account",
+        "forgot_password_link": "Forgot Your Password?"
+    },
+    "fr": {
+        "username_label": "Nom d'utilisateur",
+        "password_label": "Mot de passe",
+        "login_button": "Connexion",
+        "create_account_link": "Créer un compte",
+        "forgot_password_link": "Mot de passe oublié ?"
+    }
+}
+
 
 # Main game loop
 running = True
@@ -219,6 +272,18 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             # Check if the eye icon was clicked
+            if flag_es.get_rect(topleft=(flag_x, flag_y)).collidepoint(event.pos):
+                if current_language == "es":
+                    change_language("en")
+                    update_labels("en")
+                elif current_language == "en":
+                    change_language("fr")
+                    update_labels("fr")
+                elif current_language == "fr":
+                    change_language("es")
+                    update_labels("es")
+
+
             if eye_icon_rect.collidepoint(event.pos):
                 if eye_state == 'open':
                     eye_state = 'closed'
@@ -226,8 +291,7 @@ while running:
                     eye_state = 'open'
 
                 password_input.password_mode = not password_input.password_mode
-        
-        
+    
 
     screen.fill(light_blue)
 
@@ -255,7 +319,14 @@ while running:
     else:
         screen.blit(eye_closed, (eye_x, eye_y))
 
-    
+    # En el dibujo de la interfaz, muestra la bandera actual en la esquina superior derecha
+    if current_language == "es":
+        screen.blit(flag_es, (flag_x, flag_y))
+    elif current_language == "en":
+        screen.blit(flag_en, (flag_x, flag_y))
+    else:
+        screen.blit(flag_fr, (flag_x, flag_y))
+        
     pygame.display.flip()
 
 # Quit Pygame
